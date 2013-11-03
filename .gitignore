@@ -1,0 +1,6 @@
+tmp/*.o
+tmp/*.sys
+boring.log
+disk.img
+disk.vdi
+
