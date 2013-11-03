@@ -1,5 +1,4 @@
-tmp/*.o
-tmp/*.sys
+tmp/
 boring.log
 disk.img
 disk.vdi
