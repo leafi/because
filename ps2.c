@@ -32,10 +32,13 @@ void some_ps2_stuff()
 
 	// TODO: ensure there actually is a PS/2 controller (acpi?)
 
+	printk("---\n");
+	printk("PS/2: setup...\n");
+
 	disable_int();
 
 	// disable ps/2 ports
-	printk("disable ps/2 ports...\n");
+	//
 	// - send 0xad
 	outb(0x64, 0xad);
 	// - send 0xa7
@@ -49,13 +52,13 @@ void some_ps2_stuff()
 		inb(0x60);
 	}
 
-	printk("flushed ");
+	/*printk("flushed ");
 	printki(i);
-	printk(" bytes from ps/2 buffer\n");
+	printk(" bytes from ps/2 buffer\n");*/
 
 
 	// set CCB
-	printk("set ccb\n");
+	//printk("set ccb\n");
 	// (disable all IRQs & disable translation (clear bits 0, 1 and 6))
 	outb(0x64, 0x20);
 	unsigned char ccb = inb(0x60);
@@ -69,9 +72,9 @@ void some_ps2_stuff()
 
 	char singlechannel = 0;
 	if ((ccb & 0x20) > 0) {
-		printk("might be a two-port ps/2 controller\n");
+		printk("PS/2: might be a two-port ps/2 controller\n");
 	} else {
-		printk("can't be a two-port ps/2 controller\n");
+		printk("PS/2: can't be a two-port ps/2 controller\n");
 		singlechannel = 1;
 	}
 
@@ -80,7 +83,7 @@ void some_ps2_stuff()
 	// perform controller self test
 	// - send 0xaa
 	// - ensure response is 0x55
-	printk("self test result: ");
+	printk("PS/2: controller self test result: ");
 	outb(0x64, 0xaa);
 	unsigned char response = inb(0x60);
 	if (response == 0x55) {
@@ -97,7 +100,7 @@ void some_ps2_stuff()
 
 	// determine if there are 2 channels
 	if (!singlechannel) {
-		printk("second-chance test if this ps/2 controller has only 1 port\n");
+		//printk("second-chance test if this ps/2 controller has only 1 port\n");
 		// enable second ps/2 port & test if bit 5 of ccb is clear
 		outb(0x64, 0xa8);
 
@@ -105,25 +108,25 @@ void some_ps2_stuff()
 		char ccb2 = inb(0x60);
 
 		if ((ccb2 & 0x20) == 0) {
-			printk("this is actually a single channel controller (broken test; ignoring)\n");
+			printk("PS/2: this is actually a single channel controller (broken test; ignoring)\n");
 			//singlechannel = 1;
 		}
 	}
 
 
 	// perform controller self-test
-	outb(0x64, 0xaa);
+	/*outb(0x64, 0xaa);
 	printk("ps/2 controller self test: ");
 	if (inb(0x60) == 0x55) {
 		printk("OK\n");
 	} else {
 		printk("fail\n");
-	}
+	}*/
 
 
 	// perform interface tests
 	// - send 0xab, check result
-	printk("ps/2 controller port 1 test: ");
+	printk("PS/2: controller port 1 test: ");
 	outb(0x64, 0xab);
 	char port1result = inb(0x60);
 	if (port1result != 0x00) {
@@ -136,7 +139,7 @@ void some_ps2_stuff()
 	// - send 0xa9, check result
 	char port2result = 0;
 	if (!singlechannel) {
-		printk("ps/2 controller port 2 test: ");
+		printk("PS/2: controller port 2 test: ");
 		outb(0x64, 0xa9);
 		port2result = inb(0x60);
 		if (port2result != 0x00) {
@@ -152,31 +155,31 @@ void some_ps2_stuff()
 	// enable ports again
 	// - enable port 1
 	if (port1result == 0) {
-		printk("enable ps/2 port 1\n");
+		printk("PS/2: enable port 1\n");
 		outb(0x64, 0xae);
 	}
 	// - enable port 2
 	if (!singlechannel && (port2result == 0)) {
-		printk("enable ps/2 port 2\n");
+		printk("PS/2: enable port 2\n");
 		outb(0x64, 0xa8);
 	}
 	// - enable interrupts by modding ccb
-	printk("enabling interrupts on ps/2\n");
+	//printk("enabling interrupts on ps/2\n");
 	outb(0x64, 0x20);
 	unsigned char ccb2 = inb(0x60);
 
-	printk("ccb was ");
-	printki(ccb2);
-	printk("\n");
+	//printk("ccb was ");
+	//printki(ccb2);
+	//printk("\n");
 	if (port1result == 0) {
 		ccb2 |= 0x1;
 	}
 	if (!singlechannel && (port2result == 0)) {
 		ccb2 |= 0x2;
 	}
-	printk("ccb is now going to be ");
-	printki(ccb2);
-	printk("\n");
+	//printk("ccb is now going to be ");
+	//printki(ccb2);
+	//printk("\n");
 
 	outb(0x64, 0x60);
 	outb(0x60, ccb2);
@@ -185,18 +188,19 @@ void some_ps2_stuff()
 
 	// reset devices:
 	// - ensure 'input buffer' clear
+	printk("PS/2: resetting attached devices\n");
 	if (port1result == 0) {
-		printk("wait for ps/2 'input buffer' clear\n");
+		//printk("wait for ps/2 'input buffer' clear\n");
 		int z = 0;
 		while ((inb(0x64) & 0x2) > 0) {
 			// ...
 			z++;
 		}
-		printki(z);
+		/*printki(z);
 		printk(" time(s) to clear\n");
-		printk("send reset to ps/2 port 1\n");
+		printk("send reset to ps/2 port 1\n");*/
 		outb(0x60, 0xff); // send reset cmd to kbd
-		printk("wait for ps/2 output buffer mark\n");
+		//printk("wait for ps/2 output buffer mark\n");
 		while ((inb(0x64) & 0x1) == 0) {
 			// ...
 		}
@@ -205,7 +209,7 @@ void some_ps2_stuff()
 		
 		while (1) {
 			resetres1 = inb(0x60);
-			printk("r&sst result: ");
+			printk("PS/2: port 1 device r&sst result: ");
 
 			if (resetres1 == 0xfa) {
 				if ((inb(0x64) & 0x1) == 1) {
@@ -310,12 +314,12 @@ void some_ps2_stuff()
 
 	// TODO; reset port 2 device.
 	if (!singlechannel && (port2result == 0)) {
-		printk("TODO: reset port 2 device\n");
+		printk("PS/2: TODO: reset port 2 device\n");
 	}
 
-	printk("\nps/2 controller status reg: ");
+	/*printk("\nps/2 controller status reg: ");
 	printki(inb(0x64));
-	printk("\n");
+	printk("\n");*/
 
 	enable_int();
 }

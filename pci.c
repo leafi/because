@@ -44,10 +44,11 @@ void check_fun(unsigned short bus, unsigned short slot, unsigned short fun)
   int header = (bhlc >> 16) & 0xff;
   int multifunction = ((header & 0x80) == 0x80);
 
-  printk("h ");
+  printk("h");
   printki(header);
-  printk(" classes ");
-  printki(classes);
+	printk(" ");
+  /*printk(" classes ");
+  printki(classes);*/
 
   int blame = 0;
 
@@ -198,13 +199,15 @@ void check_fun(unsigned short bus, unsigned short slot, unsigned short fun)
 
 void pci_thing()
 {
-  printk("test:\n");
+  /*printk("test:\n");
   printki(simple());
   printk(" ");
   printki(first(0x1234, 0x5678));
   printk(" ");
-  printki(snd(0x1234, 0x5678));
-  printk("\nResults from configreading bus 0 slot 0:\n");
+  printki(snd(0x1234, 0x5678));*/
+	printk("---\n");
+	printk("PCI: Let's enumerate from bus 0 slot 0!\n");
+  //printk("\nResults from configreading bus 0 slot 0:\n");
   unsigned short device;
   for (device = 0; device < 32; device++)
   {

@@ -30,9 +30,9 @@ void _start()
   printk("I apparently have ");
   printkid(*((short*)0x5020));
   printk(" MB of rams\n");
-  printk("sizeof int : ");
+  printk("sizeof int (should be 4): ");
   printkid(sizeof(int));
-  printk(" sizeof long : ");
+  printk(" sizeof long (should be 8): ");
   printkid(sizeof(long));
   printk("\n");
 

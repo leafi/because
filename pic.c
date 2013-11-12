@@ -113,11 +113,11 @@ void irq_mask(unsigned char irq, unsigned char mask)
 		v |= (1 << irq);
 	}
 
-	printk("set irq mask on ");
+	/*printk("set irq mask on ");
 	printki(p);
 	printk(" to ");
 	printki(v);
-	printk("\n");
+	printk("\n");*/
 	outb(p, v);
 }
 
