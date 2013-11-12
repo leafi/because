@@ -7,101 +7,16 @@ extern unsigned char inb(unsigned short port);
 
 extern void pci_thing();
 
-/*inline void outb(unsigned short port, unsigned char val)
-{
-  //asm volatile("outb %0, %1" : : "a"(val), "Nd"(port));
-  asm volatile("outb %%al,%%dx": :"d" (port), "a"(val));
-}*/
-/*static inline void outw(unsigned short port, unsigned short val)
-{
-  asm volatile("outw %0, %1" : : "a"(val), "Nd"(port));
-}
-static inline void outd(unsigned short port, unsigned int val)
-{
-  asm volatile("outl %0, %1" : : "a"(val), "Nd"(port));
-}
-static inline unsigned char inb(unsigned short port)
-{
-  unsigned char ret;
-  //asm volatile("in %1, %0" : "=a"(ret) : "Nd"(port) );
-  asm volatile("inb %%dx,%%al":"=a" (ret):"d" (port));
-  return ret;
-}
-static inline unsigned short inw(unsigned short port)
-{
-  unsigned short ret;
-  asm volatile("inw %1, %0" : "=a"(ret) : "Nd"(port));
-  return ret;
-}
-static inline unsigned int ind(unsigned short port)
-{
-  unsigned int ret;
-  asm volatile("inl %1, %0" : "=a"(ret) : "Nd"(port));
-  return ret;
-}*/
+extern void some_ps2_stuff();
 
-unsigned char dontcare = 0;
+extern void some_serial_stuff();
 
-/*static void w3C0(unsigned char index, unsigned char data)
-{
-  dontcare += inb(0x3DA); // go to index state
-  outb(0x3C0, index);
-  outb(0x3C0, data);
-}
+extern void setup_apic();
+extern void setup_apic_notreally();
 
-static unsigned char r3C0(unsigned char index)
-{
-  dontcare += inb(0x3DA); // go to index state
-  outb(0x3C0, index);
-  return inb(0x3C1);
-  // if not doing inb(0x3DA) before 3C0 accesses do read 0x3DA here!
-}
+extern void setup_ata_pio();
 
-static unsigned char r3C2()
-{
-  return inb(0x3CC);
-}
-
-static void w3C2(unsigned char data)
-{
-  outb(0x3C2, data);
-}
-
-static unsigned char r3C4(unsigned char index)
-{
-  outb(0x3C4, index);
-  return inb(0x3C5);
-}
-
-static void w3C4(unsigned char index, unsigned char data)
-{
-  outb(0x3C4, index);
-  outb(0x3C5, data);
-}
-
-static unsigned char r3CE(unsigned char index)
-{
-  outb(0x3CE, index);
-  return inb(0x3CF);
-}
-
-static void w3CE(unsigned char index, unsigned char data)
-{
-  outb(0x3CE, index);
-  outb(0x3CF, data);
-}
-
-static unsigned char r3D4(unsigned char index)
-{
-  outb(0x3D4, index);
-  return inb(0x3D5);
-}
-
-static void w3D4(unsigned char index, unsigned char data)
-{
-  outb(0x3D4, index);
-  outb(0x3D5, data);
-}*/
+extern void setup_bga();
 
 // imagine dragons - radioactive
 
@@ -210,57 +125,17 @@ void _start()
 
   pci_thing();
 
+	//setup_apic();
+	setup_apic_notreally();
+	setup_pic();
 
-  /*int yy = -1;
-  int z;
-  for (z = 0; z < 10000; z++) {
-    yy *= z;
-  }*/
+	some_ps2_stuff();
 
-  //asm("cli");
+	some_serial_stuff();
 
-  /*unsigned char good = 0x02;
-  while (good & 0x02)
-    good = inb(0x64);
-  outb(0x64, 0xFE);
-  asm("hlt");*/
+	setup_ata_pio();
 
-  //outb(0x70,0x30);
-
-  
-
-  // start vga (mode 12h; 640x480 planar 16-bit)
-  /*w3C0(0x10, 0x01);
-  w3C0(0x11, 0x00);
-  w3C0(0x12, 0x0F);
-  w3C0(0x13, 0x00);
-  w3C0(0x14, 0x00);
-  w3C2(0xE3);
-  printki(r3C2(0xE3));
-  w3C4(0x01, 0x01);
-  w3C4(0x03, 0x00);
-  w3C4(0x04, 0x02);
-  w3CE(0x05, 0x00);
-  w3CE(0x06, 0x05);
-  w3D4(0x00, 0x5F);
-  w3D4(0x01, 0x4F);
-  w3D4(0x02, 0x50);
-  w3D4(0x03, 0x82);
-  w3D4(0x04, 0x54);
-  w3D4(0x05, 0x80);
-  w3D4(0x06, 0x0B);
-  w3D4(0x07, 0x3F);
-  w3D4(0x08, 0x00);
-  w3D4(0x09, 0x40);
-  w3D4(0x10, 0xEA);
-  w3D4(0x11, 0x8C);
-  w3D4(0x12, 0xDF);
-  w3D4(0x13, 0x28);
-  w3D4(0x14, 0x00);
-  w3D4(0x15, 0xE7);
-  w3D4(0x16, 0x04);
-  w3D4(0x17, 0xE3);*/
-  
+	setup_bga();
 
   while (1) { }
 
@@ -339,6 +214,7 @@ void printki(long num) {
 }
 
 void printk(char* s) {
+	char* t = s;
   char* vf = (char*)(vidfriendfront + 2 * vidfriendpos);
   char* vfb = (char*)(vidfriendback + vidfriendpos);
   int i;
@@ -388,5 +264,10 @@ void printk(char* s) {
     vfb++;
     vidfriendpos++;
   }
+
+	// give to serial, but don't do it for message 'COM1 IRQ'
+	if (t[0] != 'C' || t[3] != '1' || t[5] != 'I') {
+		serial_printk(t);
+	}
 }
 

@@ -36,8 +36,8 @@ void check_fun(unsigned short bus, unsigned short slot, unsigned short fun)
 
   int dev = (devven >> 16);
   int ven = devven & 0xffff;
-  int status = (stacmd >> 16);
-  int cmd = stacmd & 0xffff;
+  //int status = (stacmd >> 16); // -Wunused-variable
+  //int cmd = stacmd & 0xffff; // -Wunused-variable
   int class = classes >> 24;
   int subclass = (classes >> 16) & 0xff;
   int progif = (classes >> 8) & 0xff;
@@ -103,6 +103,10 @@ void check_fun(unsigned short bus, unsigned short slot, unsigned short fun)
     case 0x3:
       if (subclass == 0x00 && progif == 0x00) {
         printk("c0x03 sc0x00 pif0x00 VGA-Compatible Controller");
+				printk(" v");
+				printki(ven);
+				printk(" d");
+				printki(dev);
       } else {
         blame = 1;
       }
@@ -160,6 +164,29 @@ void check_fun(unsigned short bus, unsigned short slot, unsigned short fun)
   }
 
   printk("\n");
+
+  //unsigned int bhlc = pcireadw(bus, slot, fun, 0xc);
+
+	int z;
+	unsigned short y;
+	int a = 0;
+	for (z = 0; z < 6; z++) {
+		y = pcireadw(bus, slot, fun, 0x10 + 0x4 * z);
+		if (y != 0) {
+			if (a > 0) {
+				printk(" BAR");
+			} else {
+				printk("BAR");
+			}
+			printkid(z);
+			printk(" ");
+			printki(y);
+			a++;
+		}
+	}
+	if (a > 0) {
+		printk("\n");
+	}
 
   if (multifunction && fun == 0x00) {
     unsigned short f = 1;

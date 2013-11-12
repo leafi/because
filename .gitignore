@@ -2,4 +2,6 @@ tmp/
 boring.log
 disk.img
 disk.vdi
+.DS_Store
+*.swp
 
