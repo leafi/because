@@ -11,6 +11,7 @@ global first
 global snd
 global intq
 global irq1_ps2_port1
+global irq1_ps2_port2
 global testq
 global disable_pic
 global enable_ioapic_maybe
@@ -19,6 +20,8 @@ global disable_int
 global readthemsrthing
 global disable_local_apic
 global io_wait
+
+extern wait_for_out_data
 
 global a_irq4_handler
 extern irq4_handler
@@ -107,6 +110,25 @@ irq1_ps2_port1:
 	; write eoi to apic???
 	;mov rax, 0xfee000b0
 	;mov [rax], rax
+
+	pop rax
+	iretq
+
+irq1_ps2_port2:
+	push rax
+	mov al, [0xb8000]
+	inc al
+	mov [0xb8000], al
+
+	in al, 0x60
+
+	; write slave eoi
+	mov al, 0x20
+	out 0xa0, al
+
+	; write master eoi
+	mov al, 0x20
+	out 0x20, al
 
 	pop rax
 	iretq

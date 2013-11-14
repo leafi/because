@@ -7,6 +7,7 @@ extern void outd(unsigned short port, unsigned int val);
 extern void outw(unsigned short port, unsigned short val);
 
 extern void printki(long n);
+extern void printkid(long n);
 extern void printk(char* s);
 
 extern void intq();
@@ -17,6 +18,8 @@ extern void enable_ioapic_maybe();
 
 extern void disable_int();
 extern void enable_int();
+
+extern void readthemsrthing();
 
 unsigned int* ioapic1;
 
@@ -35,7 +38,7 @@ unsigned int read_ioapic(unsigned int regsel)
 	return *(unsigned int*)(((void*)ioapic1) + 0x10);   // 10);
 }
 
-void setup_apic(char really)
+void setup_apic()
 {
 	//disable_pic();
 
@@ -48,7 +51,7 @@ void setup_apic(char really)
 
 	if (ioapicnum > 0) {
 		printk("looking at i/o apic #1:\n");
-		ioapic1 = *((unsigned int*)0x5068);
+		ioapic1 = (unsigned int*)(*((unsigned int*)0x5068));
 		printk("base addr ");
 		printki((unsigned int) ioapic1);
 		printk("\n");
@@ -151,7 +154,7 @@ void setup_apic(char really)
 	*(unsigned long*)(0x10 * 0x80) = l;
 	int x;
 	for (x = 0; x < 256; x++) {
-		*(unsigned long*)(0x10 * x) = l;
+		*((unsigned long*)(0x10 * x)) = l;
 	}
 	/*printk(" - ");
 	printki(*(unsigned long*)(0));

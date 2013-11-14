@@ -27,6 +27,8 @@ int send_end = 0;
 //int recv_start = 0;
 //int recv_end = 0;
 
+void serial_poll();
+
 void irq4_handler()
 {
 	printk("COM1 IRQ\n");

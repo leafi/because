@@ -1,0 +1,20 @@
+#!/bin/sh
+
+cd ~/Downloads/lua-5.3.0-work1
+make generic
+
+~/opt/cross/bin/x86_64-elf-strip -d src/liblua.a
+cp src/liblua.a ~/because/lua-5.3/lib/liblua.a
+
+cd ~/newlib-x86_64-elf
+make || exit
+make install
+
+cd ~/build-newlib-x86_64-elf/x86_64-elf/lib
+~/opt/cross/bin/x86_64-elf-strip -d libc.a libm.a libnosys.a
+cp libc.a ~/because/newlib/lib/libc.a
+cp libm.a ~/because/newlib/lib/libm.a
+cp libnosys.a ~/because/newlib/lib/libnosys.a
+
+cd ~/because
+

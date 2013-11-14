@@ -7,6 +7,7 @@ extern unsigned short inw(unsigned short port);
 
 extern void printki(long n);
 extern void printk(char* s);
+extern void printkid(long n);
 extern unsigned long simple();
 extern unsigned long first(unsigned long a, unsigned long b);
 extern unsigned long snd(unsigned long a, unsigned long b);

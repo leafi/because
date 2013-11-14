@@ -12,6 +12,8 @@ extern void outb(unsigned short port, unsigned char val);
 #define BUS1CMD 0x3f6
 #define BUS2CMD 0x376
 
+void setup_ata_pio_bus(unsigned short iobase, unsigned short iocmd);
+
 void setup_ata_pio()
 {
 	printk("------------------\n");

@@ -74,9 +74,9 @@ void pic_remap(int offset1, int offset2)
 	io_wait();
 	outb(PIC2_COMMAND, ICW1_INIT + ICW1_ICW4);
 	io_wait();
-	outb(PIC1_DATA, offset1);
+	outb(PIC1_DATA, (unsigned char)offset1);
 	io_wait();
-	outb(PIC2_DATA, offset2);
+	outb(PIC2_DATA, (unsigned char)offset2);
 	io_wait();
 	outb(PIC1_DATA, 4);
 	io_wait();

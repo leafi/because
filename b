@@ -20,6 +20,9 @@ $HOME/opt/cross/bin/x86_64-elf-gcc -m64 -o tmp/ata_pio.o -c ata_pio.c -Wall -Wex
 echo bga.c
 $HOME/opt/cross/bin/x86_64-elf-gcc -m64 -o tmp/bga.o -c bga.c -Wall -Wextra -nostdlib -nostartfiles -nodefaultlibs -nostdinc -ffreestanding
 
+echo lua.c
+$HOME/opt/cross/bin/x86_64-elf-gcc -m64 -o tmp/lua.o -c lua.c -Wall -Wextra -nostdlib -nostartfiles -nodefaultlibs -nostdinc -ffreestanding -I $HOME/because/newlib/include -I $HOME/because/lua-5.3/include -I $HOME/opt/cross/lib/gcc/x86_64-elf/4.8.1/include
+
 /usr/local/bin/nasm -f elf64 -o tmp/bits.o bits.asm
 
 echo linking flat 64bit kernel binary
@@ -27,7 +30,7 @@ echo linking flat 64bit kernel binary
 # /usr/bin/local/ld can be installed by doing 'brew install binutils' if you have homebrew.
 # if you already have gnu ld, you can just use that instead.
 #
-$HOME/opt/cross/bin/x86_64-elf-ld -T linker64.ld -o tmp/kernel64.sys tmp/kernel.o tmp/bits.o tmp/pci.o tmp/ps2.o tmp/apic.o tmp/pic.o tmp/serial.o tmp/ata_pio.o tmp/bga.o || exit
+$HOME/opt/cross/bin/x86_64-elf-ld -T linker64.ld -o tmp/kernel64.sys tmp/kernel.o tmp/bits.o tmp/pci.o tmp/ps2.o tmp/apic.o tmp/pic.o tmp/serial.o tmp/ata_pio.o tmp/bga.o tmp/lua.o lua-5.3/lib/liblua.a newlib/lib/libm.a newlib/lib/libc.a newlib/lib/libnosys.a || exit
 
 echo composing disk image
 rm -rf disk.img

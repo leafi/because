@@ -1,3 +1,4 @@
+
 void printki(long num);
 void printkid(long num);
 void printk(char* s);
@@ -14,14 +15,24 @@ extern void some_serial_stuff();
 extern void setup_apic();
 extern void setup_apic_notreally();
 
+extern void setup_pic();
+
 extern void setup_ata_pio();
 
 extern void setup_bga();
+
+extern void lua_stuff();
+
+extern void serial_printk(char* s);
 
 // imagine dragons - radioactive
 
 void* kmstart;
 void* kmlimit;
+
+// end symbol - from linker script
+extern const void end;
+
 
 void _start()
 {
@@ -34,6 +45,8 @@ void _start()
   printkid(sizeof(int));
   printk(" sizeof long (should be 8): ");
   printkid(sizeof(long));
+	printk("\nsizeof long long (should be 8, for Lua 5.3): ");
+	printkid(sizeof(long long));
   printk("\n");
 
   printk("E820 System Memory Map:\n");
@@ -123,6 +136,16 @@ void _start()
   kmstart = (void*) starts[j];
   kmlimit = (void*) (starts[j] + lengths[biggest]);
 
+	if (kmstart < &end || (long)kmstart < 0x500000) {
+		printk("kmstart is ");
+		printki((long)kmstart);
+		printk(" which is less than end of kernel, ");
+		printki((long)&end);
+		printk(" -> changing kmstart\n");
+		//kmstart = &end;
+		kmstart = (void*)0x500000;
+	}
+
   pci_thing();
 
 	//setup_apic();
@@ -135,7 +158,9 @@ void _start()
 
 	setup_ata_pio();
 
-	setup_bga();
+	//setup_bga();
+
+	lua_stuff();
 
   while (1) { }
 
