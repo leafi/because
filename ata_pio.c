@@ -5,7 +5,10 @@ extern void printki(long n);
 extern void printkid(long n);
 
 extern unsigned char inb(unsigned short port);
+extern unsigned short inw(unsigned short port);
 extern void outb(unsigned short port, unsigned char val);
+
+extern void* kmalloc(long len);
 
 #define BUS1 0x1f0
 #define BUS2 0x170
@@ -13,6 +16,8 @@ extern void outb(unsigned short port, unsigned char val);
 #define BUS2CMD 0x376
 
 void setup_ata_pio_bus(unsigned short iobase, unsigned short iocmd);
+
+void read_sectors();
 
 void setup_ata_pio()
 {
@@ -42,6 +47,9 @@ void setup_ata_pio()
 	} else {
 		printk("ATA PIO Bus 2 status was floating. Probably no drives.\n");
 	}
+
+	read_sectors();
+
 }
 
 void setup_ata_pio_bus(unsigned short iobase, unsigned short iocmd)
@@ -193,6 +201,12 @@ void setup_ata_pio_bus(unsigned short iobase, unsigned short iocmd)
 				printki(idM[102]);
 				printk(" idM[103] ");
 				printki(idM[103]);
+				printk("\n");
+
+				printk("idM[60] ");
+				printki(idM[60]);
+				printk(" idM[61] ");
+				printki(idM[61]);
 				printk("\n");
 
 			}
@@ -357,5 +371,128 @@ void setup_ata_pio_bus(unsigned short iobase, unsigned short iocmd)
 		printk("Slave drive does not exist on this bus.\n");
 	}
 
+	outb(iobase + 6, 0x40);
+	inb(iobase + 7);
+	inb(iobase + 7);
+	inb(iobase + 7);
+	inb(iobase + 7);
+
+}
+
+void* disk1 = (void*) 0;
+char d1sp[65536];
+
+void make_sectors_available(unsigned long lba);
+
+unsigned char rdiskb(unsigned long offset)
+{
+	make_sectors_available(offset / 512);
+	return *((unsigned char*) (((unsigned long)disk1) + offset));
+}
+
+unsigned short rdiskw(unsigned long offset)
+{
+	make_sectors_available(offset / 512);
+	return *((unsigned short*) (((unsigned long)disk1) + offset));
+}
+
+unsigned int rdiski(unsigned long offset)
+{
+	make_sectors_available(offset / 512);
+	return *((unsigned int*) (((unsigned long)disk1) + offset));
+}
+
+unsigned long rdiskl(unsigned long offset)
+{
+	make_sectors_available(offset / 512);
+	return *((unsigned long*) (((unsigned long)disk1) + offset));
+}
+
+void read_some_sectors(unsigned short iobase, unsigned long lba, unsigned short num_sectors);
+
+void make_sectors_available(unsigned long lba)
+{
+	if ((d1sp[lba] == 0) || (d1sp[lba + 1] == 0)) {
+		//printk("caching eight sectors\n");
+		read_some_sectors(0x1f0, lba, 8);
+	}
+}
+
+void read_sectors()
+{
+	int j;
+
+	for (j = 0; j < 65536; j++) {
+		d1sp[j] = 0;
+	}
+
+	disk1 = kmalloc(32 * 1024 * 1024);
+}
+
+void read_some_sectors(unsigned short iobase, unsigned long lba, unsigned short num_sectors)
+{
+	//unsigned long lba = 0;
+	//unsigned short num_sectors = 0; // 65536 sectors == 32 MB
+
+	outb(iobase + 2, (unsigned char)((num_sectors & 0xff00) >> 8));
+	outb(iobase + 3, (unsigned char)((lba & 0xff000000) >> 24));
+	outb(iobase + 4, (unsigned char)((lba & 0xff00000000) >> 32));
+	outb(iobase + 5, (unsigned char)((lba & 0xff0000000000) >> 40));
+
+	outb(iobase + 2, (unsigned char)(num_sectors & 0xff));
+	outb(iobase + 3, (unsigned char)(lba & 0xff));
+	outb(iobase + 4, (unsigned char)((lba & 0xff00) >> 8));
+	outb(iobase + 5, (unsigned char)((lba & 0xff0000) >> 16));
+	
+	outb(iobase + 7, 0x24);
+
+	unsigned short* d = (unsigned short*)((unsigned long)disk1 + lba * 512);
+	unsigned char e = 0;
+
+	unsigned long j;
+	for (j = lba; j < lba + num_sectors; j++) {
+		d1sp[j] = 1;
+	}
+
+	for (; ((unsigned long)d) < (((unsigned long)disk1) + lba * 512 + num_sectors * 512); ) {
+		unsigned char status = inb(iobase + 7);
+
+		while (1) {
+			status = inb(iobase + 7);
+
+			// BSY clear && DRQ set?
+			if ( ((status & 0x80) == 0) && ((status & 0x8) > 0) ) {
+				break;
+			}
+
+			// ERR set || DF set?
+			if ( ((status & 0x1) > 0) || ((status & 0x20) > 0) ) {
+				e = 1;
+				break;
+			}
+		}
+
+		if (e == 1) {
+			printk("Error reading disk (ptr ");
+			printki((long)d);
+			printk(")\n");
+			break;
+		}
+		
+		int i;
+		for (i = 0; i < 256; i++) {
+			*d = inw(iobase);
+			d++;
+		}
+
+		inb(iobase + 7);
+		inb(iobase + 7);
+		inb(iobase + 7);
+		inb(iobase + 7);
+	}
+
+	//printk("Disk read finished\n");
+
+	
 }
 

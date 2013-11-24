@@ -51,9 +51,9 @@ void setup_apic()
 
 	if (ioapicnum > 0) {
 		printk("looking at i/o apic #1:\n");
-		ioapic1 = (unsigned int*)(*((unsigned int*)0x5068));
+		ioapic1 = *((unsigned int**)0x5068);
 		printk("base addr ");
-		printki((unsigned int) ioapic1);
+		printki((long) ioapic1);
 		printk("\n");
 
 		printk("IOAPICID: ");
@@ -154,7 +154,7 @@ void setup_apic()
 	*(unsigned long*)(0x10 * 0x80) = l;
 	int x;
 	for (x = 0; x < 256; x++) {
-		*((unsigned long*)(0x10 * x)) = l;
+		*((unsigned long*)((long)(0x10 * x))) = l;
 	}
 	/*printk(" - ");
 	printki(*(unsigned long*)(0));

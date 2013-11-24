@@ -21,6 +21,8 @@ global readthemsrthing
 global disable_local_apic
 global io_wait
 
+extern call_lua_int
+
 extern wait_for_out_data
 
 global a_irq4_handler
@@ -113,6 +115,72 @@ irq1_ps2_port1:
 
 	pop rax
 	iretq
+
+%macro pushforccall 0
+	push rax
+	;push rbx ; PRESERVED
+	push rcx
+	push rdx
+	;push rbp ; PRESERVED
+	push rdi
+	push rsi
+	push r8
+	push r9
+	push r10
+	push r11
+	;push r12
+	;push r13
+	;push r14
+	;push r15
+%endmacro
+
+%macro popforccall 0
+	;pop r15
+	;pop r14
+	;pop r13
+	;pop r12
+	pop r11
+	pop r10
+	pop r9
+	pop r8
+	pop rsi
+	pop rdi
+	;pop rbp
+	pop rdx
+	pop rcx
+	;pop rbx
+	pop rax
+%endmacro
+
+%macro lirq 1
+	pushforccall
+	mov rdi, %1
+	call call_lua_int
+	popforccall
+	iretq
+%endmacro
+
+%macro dlirq 1
+	global irq%1
+	irq%1: lirq 0x20 + %1
+%endmacro
+
+dlirq 0
+dlirq 1
+dlirq 2
+dlirq 3
+dlirq 4
+dlirq 5
+dlirq 6
+dlirq 7
+dlirq 8
+dlirq 9
+dlirq 10
+dlirq 11
+dlirq 12
+dlirq 13
+dlirq 14
+dlirq 15
 
 irq1_ps2_port2:
 	push rax

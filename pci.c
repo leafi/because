@@ -31,7 +31,7 @@ void check_fun(unsigned short bus, unsigned short slot, unsigned short fun)
   if (devven == 0xFFFFFFFF)
     return;
 
-  unsigned int stacmd = pcireadw(bus, slot, fun, 0x4);
+  //unsigned int stacmd = pcireadw(bus, slot, fun, 0x4);
   unsigned int classes = pcireadw(bus, slot, fun, 0x8);
   unsigned int bhlc = pcireadw(bus, slot, fun, 0xc);
 
@@ -158,6 +158,10 @@ void check_fun(unsigned short bus, unsigned short slot, unsigned short fun)
     printki(subclass);
     printk(" progif ");
     printki(progif);
+		printk(" v ");
+		printki(ven);
+		printk(" d ");
+		printki(dev);
     printk(" :: Unrecognized device");
   }
 

@@ -16,8 +16,26 @@ extern void enable_int();
 
 extern void io_wait();
 
+extern void irq0();
+extern void irq1();
+extern void irq2();
+extern void irq3();
+extern void irq4();
+extern void irq5();
+extern void irq6();
+extern void irq7();
+extern void irq8();
+extern void irq9();
+extern void irq10();
+extern void irq11();
+extern void irq12();
+extern void irq13();
+extern void irq14();
+extern void irq15();
+
 void pic_remap(int offset1, int offset2);
 void irq_mask(unsigned char irq, unsigned char mask);
+void set_int(unsigned char inte, void* funptr);
 
 void setup_pic()
 {
@@ -32,6 +50,24 @@ void setup_pic()
 	*(unsigned long*)(0x10 * 0x21) = l;*/
 	
 	pic_remap(0x20, 0x28);
+
+	// setup non-0x20+1, non-0x20+12 irqs pls
+	set_int(0x20, irq0);
+	//set_int(0x21, irq1);
+	//set_int(0x22, irq2);
+	set_int(0x23, irq3);
+	set_int(0x24, irq4);
+	set_int(0x25, irq5);
+	set_int(0x26, irq6);
+	set_int(0x27, irq7);
+	set_int(0x28, irq8);
+	set_int(0x29, irq9);
+	set_int(0x2a, irq10);
+	set_int(0x2b, irq11);
+	//set_int(0x2c, irq12);
+	set_int(0x2d, irq13);
+	set_int(0x2e, irq14);
+	set_int(0x2f, irq15);
 
 	enable_int();
 }

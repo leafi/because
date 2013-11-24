@@ -38,6 +38,8 @@ cp pure64/Pure64.img disk.img
 echo attaching >boring.log
 hdiutil attach disk.img >>boring.log
 cp tmp/kernel64.sys /Volumes/BECAUSE/kernel64.sys
+mkdir /Volumes/BECAUSE/LBECAUSE
+cp lbecause/*.lua /Volumes/BECAUSE/LBECAUSE/
 echo detaching >>boring.log
 hdiutil detach /Volumes/BECAUSE >>boring.log
 

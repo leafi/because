@@ -133,8 +133,8 @@ void _start()
     }
   }
 
-  kmstart = (void*) starts[j];
-  kmlimit = (void*) (starts[j] + lengths[biggest]);
+  kmstart = (void*) starts[biggest];
+  kmlimit = (void*) (starts[biggest] + lengths[biggest]);
 
 	if (kmstart < &end || (long)kmstart < 0x500000) {
 		printk("kmstart is ");
