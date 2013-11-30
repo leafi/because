@@ -4,6 +4,7 @@
 #include <lualib.h>
 
 #include <stdio.h>
+#include <stdlib.h>
 
 extern void printk(char* s);
 extern void printki(long n);
@@ -24,6 +25,26 @@ extern void outw(unsigned short port, unsigned short val);
 extern void outd(unsigned short port, unsigned int val);
 
 extern void irq_mask(unsigned char irq, unsigned char mask);
+
+extern void io_wait();
+
+static int lmalloc(lua_State *L)
+{
+	lua_pushunsigned(L, (lua_Unsigned) malloc(lua_tounsigned(L, 1)));
+	return 1;
+}
+
+static int lcalloc(lua_State *L)
+{
+	lua_pushunsigned(L, (lua_Unsigned) calloc(lua_tounsigned(L, 1), lua_tounsigned(L, 2)));
+	return 1;
+}
+
+static int lfree(lua_State *L)
+{
+	free(lua_tounsigned(L, 1));
+	return 0;
+}
 
 static int lkmalloc(lua_State *L)
 {
@@ -165,6 +186,12 @@ static int lirqmask(lua_State *L)
 	return 0;
 }
 
+static int liowait(lua_State *L)
+{
+	io_wait();
+	return 0;
+}
+
 lua_State *globalL;
 
 void call_lua_int(long inte)
@@ -265,6 +292,10 @@ static const luaL_Reg bclib[] = {
 	{"pokel", lpokel},
 	{"kmalloc", lkmalloc},
 	{"irqmask", lirqmask},
+	{"iowait", liowait},
+	{"malloc", lmalloc},
+	{"calloc", lcalloc},
+	{"free", lfree},
 	{NULL,     NULL}
 };
 

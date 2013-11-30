@@ -19,6 +19,14 @@ function call_lua_int_2(inte)
 	end
 end
 
+function interrupts.add(inte, fun)
+	if not interrupts[inte] then
+		interrupts[inte] = { fun }
+	else
+		table.insert(interrupts[inte], fun)
+	end
+end
+
 function interrupts.setup()
 
 	-- all the lua interrupts are set up in pic.c
